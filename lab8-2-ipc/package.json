@@ -1,12 +1,3 @@
-{
-  "name": "lab8-2-ipc",
-  "version": "1.0.0",
-  "description": "Learning IPC Communication for Agent Wallboard",
-  "main": "main.js",
-  "scripts": {
-    "start": "electron ."
-  },
-  "devDependencies": {
-    "electron": "^38.1.2"
-  }
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:80245bd52844c92b2ab226827b8d532af4c6b1f84f2f5dee40b90c1221969a81
+size 247

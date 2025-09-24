@@ -1,14 +1,3 @@
-{
-  "name": "my-first-electron-app",
-  "version": "1.0.0",
-  "description": "My first Electron application",
-  "main": "main.js",
-  "scripts": {
-    "start": "electron ."
-  },
-  "author": "Your Name",
-  "license": "MIT",
-  "devDependencies": {
-    "electron": "^38.1.2"
-  }
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:ec62909cce698ccb98adf9e9ac02e4b24265db4cccc4478442bd26d262b6ebe2
+size 275
