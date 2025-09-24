@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab 8.2 - IPC Communication Demo</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .container { max-width: 900px; margin: 0 auto; background: rgba(255, 255, 255, 0.1); padding: 30px; border-radius: 15px; backdrop-filter: blur(10px); }
+    .header { text-align: center; margin-bottom: 30px; }
+    .demo-section { background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+    .input-group { margin: 15px 0; }
+    .input-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+    .input-group input { width: 100%; padding: 10px; border: none; border-radius: 5px; font-size: 16px; box-sizing: border-box; }
+    .button { background: rgba(255,255,255,0.2); border:2px solid white; color:white; padding:12px 24px; border-radius:25px; cursor:pointer; font-size:16px; margin:10px 5px; transition: all 0.3s ease;}
+    .button:hover { background:white; color:#667eea; transform: translateY(-2px); }
+    .result-box { background: rgba(0,0,0,0.2); padding:15px; border-radius:8px; margin-top:15px; font-family: monospace; white-space: pre-wrap; max-height:200px; overflow-y:auto; }
+    .loading { color:#ffd700; font-style:italic; }
+    .success { color:#90ee90; }
+    .error { color:#ff6b6b; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔄 IPC Communication Demo</h1>
+      <p>การสื่อสารระหว่าง Main Process และ Renderer Process</p>
+    </div>
+
+    <!-- Demo 1: ส่งข้อความพื้นฐาน -->
+    <div class="demo-section">
+      <h3>📤 Demo 1: ส่งข้อความไป Main Process</h3>
+      <div class="input-group">
+        <label>ข้อความที่ต้องการส่ง:</label>
+        <input type="text" id="messageInput" placeholder="พิมพ์ข้อความที่นี่..." value="Hello from Renderer Process!">
+      </div>
+      <button class="button" onclick="sendMessage()">📤 ส่งข้อความ</button>
+      <button class="button" onclick="clearResult('messageResult')">🧹 เคลียร์</button>
+      <div class="result-box" id="messageResult">กดปุ่ม "ส่งข้อความ" เพื่อทดสอบ IPC</div>
+    </div>
+
+    <!-- Demo 2: ระบบทักทาย -->
+    <div class="demo-section">
+      <h3>👋 Demo 2: ระบบทักทาย Agent</h3>
+      <div class="input-group">
+        <label>ชื่อ Agent:</label>
+        <input type="text" id="agentName" placeholder="ใส่ชื่อของคุณ..." value="Agent001">
+      </div>
+      <button class="button" onclick="sayHello()">👋 เข้าสู่ระบบ</button>
+      <button class="button" onclick="clearResult('helloResult')">🧹 เคลียร์</button>
+      <div class="result-box" id="helloResult">กดปุ่ม "เข้าสู่ระบบ" เพื่อทดสอบระบบทักทาย</div>
+    </div>
+
+    <!-- Demo 3: Agent Wallboard -->
+    <div class="demo-section">
+      <h3>📊 Demo 3: Agent Wallboard Functions</h3>
+      <button class="button" onclick="loadAgents()">📊 โหลดข้อมูล Agents</button>
+      <button class="button" onclick="showStatusSelector()">🔄 เปลี่ยนสถานะ</button>
+      <button class="button" onclick="clearResult('agentResult')">🧹 เคลียร์</button>
+
+      <div id="statusSelector" style="display:none; margin:15px 0;">
+        <select id="agentSelect" style="padding:8px; margin-right:10px;"><option value="">เลือก Agent</option></select>
+        <select id="statusSelect" style="padding:8px; margin-right:10px;">
+          <option value="Available">Available</option>
+          <option value="Busy">Busy</option>
+          <option value="Break">Break</option>
+          <option value="Offline">Offline</option>
+        </select>
+        <button class="button" onclick="changeStatus()">✅ เปลี่ยน</button>
+      </div>
+      <div class="result-box" id="agentResult">กดปุ่ม "โหลดข้อมูล Agents" เพื่อเริ่มต้น</div>
+    </div>
+  </div>
+
+  <script>
+    console.log('🎨 [RENDERER] กำลังโหลด...');
+
+    if (!window.electronAPI) console.error('❌ [RENDERER] electronAPI ไม่พร้อมใช้งาน');
+
+    let agentsData = null;
+
+    function displayResult(elementId, data, type='info') {
+      const element = document.getElementById(elementId);
+      const timestamp = new Date().toLocaleTimeString('th-TH');
+      let content = (typeof data === 'object') ? JSON.stringify(data, null, 2) : data.toString();
+      element.innerHTML = `[${timestamp}] ${content}`;
+      element.className = `result-box ${type}`;
+    }
+
+    async function sendMessage() {
+      const msg = document.getElementById('messageInput').value.trim();
+      if (!msg) return displayResult('messageResult','กรุณาใส่ข้อความ','error');
+      displayResult('messageResult','กำลังส่งข้อความ...','loading');
+      try {
+        const response = await window.electronAPI.sendMessage(msg);
+        displayResult('messageResult', response,'success');
+      } catch(e) { displayResult('messageResult', `Error: ${e.message}`,'error'); }
+    }
+
+    async function sayHello() {
+      const name = document.getElementById('agentName').value.trim();
+      if (!name) return displayResult('helloResult','กรุณาใส่ชื่อ Agent','error');
+      displayResult('helloResult','กำลังเข้าสู่ระบบ...','loading');
+      try {
+        const res = await window.electronAPI.sayHello(name);
+        const text = `🎉 เข้าสู่ระบบสำเร็จ!\n\n👤 Agent: ${res.name}\n💬 ข้อความ: ${res.greeting}\n⏰ เวลา: ${res.time}\n👥 Agents ออนไลน์: ${res.agentCount}\n✅ พร้อมทำงานแล้ว!`;
+        displayResult('helloResult', text, 'success');
+      } catch(e){ displayResult('helloResult', `Error: ${e.message}`,'error'); }
+    }
+
+    async function loadAgents() {
+      displayResult('agentResult','กำลังโหลดข้อมูล agents...','loading');
+      try {
+        const res = await window.electronAPI.getAgents();
+        if(!res.success) throw new Error(res.error);
+        agentsData = res.data;
+        displayAgentData(agentsData);
+        updateAgentSelector(agentsData.agents);
+      } catch(e){ displayResult('agentResult', `Error: ${e.message}`,'error'); }
+    }
+
+    function displayAgentData(data){
+      const stats = data.statistics;
+      const list = data.agents.map(a=>{
+        const emoji = {'Available':'🟢','Busy':'🔴','Break':'🟡','Offline':'⚫'}[a.status]||'❓';
+        return `${emoji} ${a.name} (${a.id}) 📞 Ext:${a.extension} 🏢 ${a.department} 📊 Calls:${a.totalCalls} ⏱️ Avg:${a.avgCallTime}s`;
+      }).join('\n\n');
+      const text = `📊 AGENT WALLBOARD DATA\n======================\n👥 AGENTS (${stats.totalAgents} คน):\n${list}\n📈 STATISTICS:\n🟢 Available: ${stats.availableAgents}\n🔴 Busy: ${stats.busyAgents}\n🟡 Break: ${stats.onBreakAgents}\n📞 Total Calls Today: ${stats.totalCallsToday}\n⏰ Avg Wait Time: ${stats.avgWaitTime}s\n⏰ Last Updated: ${new Date().toLocaleString('th-TH')}`;
+      displayResult('agentResult', text,'success');
+    }
+
+    function updateAgentSelector(agents){
+      const sel = document.getElementById('agentSelect');
+      sel.innerHTML='<option value="">เลือก Agent</option>';
+      agents.forEach(a=>{
+        const opt = document.createElement('option');
+        opt.value=a.id;
+        opt.textContent=`${a.name} (${a.id}) - ${a.status}`;
+        sel.appendChild(opt);
+      });
+    }
+
+    function showStatusSelector(){
+      if(!agentsData) return displayResult('agentResult','กรุณาโหลดข้อมูล agents ก่อน','error');
+      const sel = document.getElementById('statusSelector');
+      sel.style.display = sel.style.display==='none'?'block':'none';
+    }
+
+    async function changeStatus(){
+      const id = document.getElementById('agentSelect').value;
+      const status = document.getElementById('statusSelect').value;
+      if(!id||!status) return displayResult('agentResult','กรุณาเลือก Agent และ Status','error');
+      displayResult('agentResult',`กำลังเปลี่ยนสถานะ ${id}...`,'loading');
+      try{
+        const res = await window.electronAPI.changeAgentStatus(id,status);
+        if(!res.success) throw new Error(res.error);
+        const text = `✅ เปลี่ยนสถานะสำเร็จ!\n\n👤 Agent: ${res.agent.name} (${res.agent.id})\n🔄 Status: ${res.agent.status}\n⏰ เวลา: ${new Date(res.agent.lastStatusChange).toLocaleString('th-TH')}\n${res.message}`;
+        displayResult('agentResult', text,'success');
+        setTimeout(loadAgents,2000);
+      } catch(e){ displayResult('agentResult', `Error: ${e.message}`,'error'); }
+    }
+
+    function clearResult(id){
+      const el=document.getElementById(id);
+      el.innerHTML='เคลียร์แล้ว...';
+      el.className='result-box';
+    }
+
+    document.getElementById('messageInput').addEventListener('keypress', e=>{ if(e.key==='Enter') sendMessage(); });
+    document.getElementById('agentName').addEventListener('keypress', e=>{ if(e.key==='Enter') sayHello(); });
+
+    window.addEventListener('DOMContentLoaded',()=>console.log('📄 [RENDERER] HTML โหลดเสร็จ'));
+    window.addEventListener('load',()=>console.log('✅ [RENDERER] ทุกอย่างพร้อมแล้ว'));
+  </script>
+</body>
+</html>
