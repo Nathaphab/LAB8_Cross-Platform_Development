@@ -5,4 +5,4 @@ node_modules/
 dist/
 anaconda3/
 *.dat
-*.ini
+*.ininode_modules/ 
