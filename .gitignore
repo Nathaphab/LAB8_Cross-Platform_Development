@@ -1,2 +1,8 @@
 node_modules/
-*.exe
+*.log
+*.ipynb_checkpoints
+.DS_Store
+dist/
+anaconda3/
+*.dat
+*.ini
