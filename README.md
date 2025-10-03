@@ -5,6 +5,7 @@
 <img width="972" height="921" alt="image" src="https://github.com/user-attachments/assets/7fa91a31-165d-428c-8b66-508cc099b1c5" />
 <img width="766" height="911" alt="image" src="https://github.com/user-attachments/assets/c2393445-b48c-43ea-8e8d-75d261ee1280" />
 * lab8-2-ipc
+  
 <img width="1220" height="710" alt="image" src="https://github.com/user-attachments/assets/17d8df08-199f-43fd-a9ef-21eb78783cf6" />
 <img width="1225" height="611" alt="image" src="https://github.com/user-attachments/assets/f4502042-7eaa-4e36-90e2-47c21c6916c1" />
 <img width="1224" height="543" alt="image" src="https://github.com/user-attachments/assets/ffe525e1-02d4-4a99-ba65-82f41b9d541d" />
