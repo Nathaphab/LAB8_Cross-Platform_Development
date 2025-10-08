@@ -1,4 +1,4 @@
-"# LAB8_Cross-Platform_Development" 
+# LAB8_Cross-Platform_Development" 
 * My-First-electron-app
 <img width="814" height="926" alt="image" src="https://github.com/user-attachments/assets/a1472b73-d682-402d-aab8-cb9f0564ac47" />
 <img width="956" height="917" alt="image" src="https://github.com/user-attachments/assets/ff389917-45e3-47ad-a7db-d42f10798f38" />
